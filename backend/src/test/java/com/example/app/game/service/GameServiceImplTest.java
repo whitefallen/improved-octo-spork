@@ -1,6 +1,8 @@
 package com.example.app.game.service;
 
 import com.example.app.game.domain.Game;
+import com.example.app.game.dto.GameRequest;
+import com.example.app.game.dto.GameResponse;
 import com.example.app.game.repository.GameRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,7 @@ class GameServiceImplTest {
     private GameServiceImpl gameService;
 
     private Game game;
+    private GameRequest gameRequest;
 
     @BeforeEach
     void setUp() {
@@ -38,20 +41,30 @@ class GameServiceImplTest {
         game.setDeveloper("Test Dev");
         game.setReleaseYear(2024);
         game.setDescription("A great game");
+
+        gameRequest = new GameRequest();
+        gameRequest.setTitle("Test Game");
+        gameRequest.setGenre("Action");
+        gameRequest.setPlatform("PC");
+        gameRequest.setDeveloper("Test Dev");
+        gameRequest.setReleaseYear(2024);
+        gameRequest.setDescription("A great game");
     }
 
     @Test
     void findAll_returnsAllGames() {
         when(gameRepository.findAll()).thenReturn(Arrays.asList(game));
-        List<Game> result = gameService.findAll();
+        List<GameResponse> result = gameService.findAll();
         assertThat(result).hasSize(1);
+        assertThat(result.get(0).getTitle()).isEqualTo("Test Game");
     }
 
     @Test
     void findById_found() {
         when(gameRepository.findById(1L)).thenReturn(Optional.of(game));
-        Optional<Game> result = gameService.findById(1L);
+        Optional<GameResponse> result = gameService.findById(1L);
         assertThat(result).isPresent();
+        assertThat(result.get().getPlatform()).isEqualTo("PC");
     }
 
     @Test
@@ -63,9 +76,10 @@ class GameServiceImplTest {
     @Test
     void save_persistsGame() {
         when(gameRepository.save(any(Game.class))).thenReturn(game);
-        Game saved = gameService.save(game);
+        GameResponse saved = gameService.save(gameRequest);
         assertThat(saved).isNotNull();
-        verify(gameRepository).save(game);
+        assertThat(saved.getTitle()).isEqualTo("Test Game");
+        verify(gameRepository).save(any(Game.class));
     }
 
     @Test
@@ -75,14 +89,14 @@ class GameServiceImplTest {
         when(gameRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(gameRepository.save(any(Game.class))).thenReturn(existing);
 
-        Game updated = gameService.update(1L, game);
+        GameResponse updated = gameService.update(1L, gameRequest);
         assertThat(updated.getTitle()).isEqualTo("Test Game");
     }
 
     @Test
     void update_notFound_throwsException() {
         when(gameRepository.findById(99L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> gameService.update(99L, game))
+        assertThatThrownBy(() -> gameService.update(99L, gameRequest))
                 .isInstanceOf(NoSuchElementException.class);
     }
 

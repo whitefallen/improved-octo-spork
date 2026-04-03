@@ -1,6 +1,8 @@
 package com.example.app.song.service;
 
 import com.example.app.song.domain.Song;
+import com.example.app.song.dto.SongRequest;
+import com.example.app.song.dto.SongResponse;
 import com.example.app.song.repository.SongRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,7 @@ class SongServiceImplTest {
     private SongServiceImpl songService;
 
     private Song song;
+    private SongRequest songRequest;
 
     @BeforeEach
     void setUp() {
@@ -37,20 +40,29 @@ class SongServiceImplTest {
         song.setAlbum("Test Album");
         song.setGenre("Rock");
         song.setDurationSeconds(240);
+
+        songRequest = new SongRequest();
+        songRequest.setTitle("Test Song");
+        songRequest.setArtist("Test Artist");
+        songRequest.setAlbum("Test Album");
+        songRequest.setGenre("Rock");
+        songRequest.setDurationSeconds(240);
     }
 
     @Test
     void findAll_returnsAllSongs() {
         when(songRepository.findAll()).thenReturn(Arrays.asList(song));
-        List<Song> result = songService.findAll();
+        List<SongResponse> result = songService.findAll();
         assertThat(result).hasSize(1);
+        assertThat(result.get(0).getTitle()).isEqualTo("Test Song");
     }
 
     @Test
     void findById_found() {
         when(songRepository.findById(1L)).thenReturn(Optional.of(song));
-        Optional<Song> result = songService.findById(1L);
+        Optional<SongResponse> result = songService.findById(1L);
         assertThat(result).isPresent();
+        assertThat(result.get().getArtist()).isEqualTo("Test Artist");
     }
 
     @Test
@@ -62,9 +74,10 @@ class SongServiceImplTest {
     @Test
     void save_persistsSong() {
         when(songRepository.save(any(Song.class))).thenReturn(song);
-        Song saved = songService.save(song);
+        SongResponse saved = songService.save(songRequest);
         assertThat(saved).isNotNull();
-        verify(songRepository).save(song);
+        assertThat(saved.getTitle()).isEqualTo("Test Song");
+        verify(songRepository).save(any(Song.class));
     }
 
     @Test
@@ -74,14 +87,14 @@ class SongServiceImplTest {
         when(songRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(songRepository.save(any(Song.class))).thenReturn(existing);
 
-        Song updated = songService.update(1L, song);
+        SongResponse updated = songService.update(1L, songRequest);
         assertThat(updated.getTitle()).isEqualTo("Test Song");
     }
 
     @Test
     void update_notFound_throwsException() {
         when(songRepository.findById(99L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> songService.update(99L, song))
+        assertThatThrownBy(() -> songService.update(99L, songRequest))
                 .isInstanceOf(NoSuchElementException.class);
     }
 

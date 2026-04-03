@@ -1,11 +1,13 @@
 package com.example.app.game.controller;
 
-import com.example.app.game.domain.Game;
+import com.example.app.game.dto.GameRequest;
+import com.example.app.game.dto.GameResponse;
 import com.example.app.game.service.GameService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -16,26 +18,26 @@ public class GameController {
     private final GameService gameService;
 
     @GetMapping
-    public List<Game> getAll() {
+    public List<GameResponse> getAll() {
         return gameService.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Game> getById(@PathVariable Long id) {
+    public ResponseEntity<GameResponse> getById(@PathVariable Long id) {
         return gameService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Game create(@RequestBody Game game) {
-        return gameService.save(game);
+    public GameResponse create(@Valid @RequestBody GameRequest request) {
+        return gameService.save(request);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Game> update(@PathVariable Long id, @RequestBody Game game) {
+    public ResponseEntity<GameResponse> update(@PathVariable Long id, @Valid @RequestBody GameRequest request) {
         try {
-            return ResponseEntity.ok(gameService.update(id, game));
+            return ResponseEntity.ok(gameService.update(id, request));
         } catch (java.util.NoSuchElementException e) {
             return ResponseEntity.notFound().build();
         }

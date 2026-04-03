@@ -1,13 +1,15 @@
 package com.example.app.song.service;
 
-import com.example.app.song.domain.Song;
+import com.example.app.song.dto.SongRequest;
+import com.example.app.song.dto.SongResponse;
+
 import java.util.List;
 import java.util.Optional;
 
 public interface SongService {
-    List<Song> findAll();
-    Optional<Song> findById(Long id);
-    Song save(Song song);
-    Song update(Long id, Song song);
+    List<SongResponse> findAll();
+    Optional<SongResponse> findById(Long id);
+    SongResponse save(SongRequest request);
+    SongResponse update(Long id, SongRequest request);
     void deleteById(Long id);
 }

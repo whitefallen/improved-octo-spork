@@ -1,6 +1,8 @@
 package com.example.app.recipe.service;
 
 import com.example.app.recipe.domain.Recipe;
+import com.example.app.recipe.dto.RecipeRequest;
+import com.example.app.recipe.dto.RecipeResponse;
 import com.example.app.recipe.repository.RecipeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,7 @@ class RecipeServiceImplTest {
     private RecipeServiceImpl recipeService;
 
     private Recipe recipe;
+    private RecipeRequest recipeRequest;
 
     @BeforeEach
     void setUp() {
@@ -37,36 +40,46 @@ class RecipeServiceImplTest {
         recipe.setInstructions("Some instructions");
         recipe.setIngredients("Ingredient 1, Ingredient 2");
         recipe.setFrontendUrl("http://example.com");
+
+        recipeRequest = new RecipeRequest();
+        recipeRequest.setTitle("Test Recipe");
+        recipeRequest.setDescription("A description");
+        recipeRequest.setInstructions("Some instructions");
+        recipeRequest.setIngredients("Ingredient 1, Ingredient 2");
+        recipeRequest.setFrontendUrl("http://example.com");
     }
 
     @Test
     void findAll_returnsAllRecipes() {
         when(recipeRepository.findAll()).thenReturn(Arrays.asList(recipe));
-        List<Recipe> result = recipeService.findAll();
+        List<RecipeResponse> result = recipeService.findAll();
         assertThat(result).hasSize(1);
+        assertThat(result.get(0).getTitle()).isEqualTo("Test Recipe");
         verify(recipeRepository).findAll();
     }
 
     @Test
     void findById_found() {
         when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
-        Optional<Recipe> result = recipeService.findById(1L);
+        Optional<RecipeResponse> result = recipeService.findById(1L);
         assertThat(result).isPresent();
+        assertThat(result.get().getTitle()).isEqualTo("Test Recipe");
     }
 
     @Test
     void findById_notFound() {
         when(recipeRepository.findById(99L)).thenReturn(Optional.empty());
-        Optional<Recipe> result = recipeService.findById(99L);
+        Optional<RecipeResponse> result = recipeService.findById(99L);
         assertThat(result).isEmpty();
     }
 
     @Test
     void save_persistsRecipe() {
         when(recipeRepository.save(any(Recipe.class))).thenReturn(recipe);
-        Recipe saved = recipeService.save(recipe);
+        RecipeResponse saved = recipeService.save(recipeRequest);
         assertThat(saved).isNotNull();
-        verify(recipeRepository).save(recipe);
+        assertThat(saved.getTitle()).isEqualTo("Test Recipe");
+        verify(recipeRepository).save(any(Recipe.class));
     }
 
     @Test
@@ -76,14 +89,14 @@ class RecipeServiceImplTest {
         when(recipeRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(recipeRepository.save(any(Recipe.class))).thenReturn(existing);
 
-        Recipe updated = recipeService.update(1L, recipe);
+        RecipeResponse updated = recipeService.update(1L, recipeRequest);
         assertThat(updated.getTitle()).isEqualTo("Test Recipe");
     }
 
     @Test
     void update_notFound_throwsException() {
         when(recipeRepository.findById(99L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> recipeService.update(99L, recipe))
+        assertThatThrownBy(() -> recipeService.update(99L, recipeRequest))
                 .isInstanceOf(NoSuchElementException.class);
     }
 

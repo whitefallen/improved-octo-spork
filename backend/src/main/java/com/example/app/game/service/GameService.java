@@ -1,13 +1,15 @@
 package com.example.app.game.service;
 
-import com.example.app.game.domain.Game;
+import com.example.app.game.dto.GameRequest;
+import com.example.app.game.dto.GameResponse;
+
 import java.util.List;
 import java.util.Optional;
 
 public interface GameService {
-    List<Game> findAll();
-    Optional<Game> findById(Long id);
-    Game save(Game game);
-    Game update(Long id, Game game);
+    List<GameResponse> findAll();
+    Optional<GameResponse> findById(Long id);
+    GameResponse save(GameRequest request);
+    GameResponse update(Long id, GameRequest request);
     void deleteById(Long id);
 }

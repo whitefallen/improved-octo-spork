@@ -1,6 +1,8 @@
 package com.example.app.game.service;
 
 import com.example.app.game.domain.Game;
+import com.example.app.game.dto.GameRequest;
+import com.example.app.game.dto.GameResponse;
 import com.example.app.game.repository.GameRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,36 +21,64 @@ public class GameServiceImpl implements GameService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Game> findAll() {
-        return gameRepository.findAll();
+    public List<GameResponse> findAll() {
+        return gameRepository.findAll().stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Game> findById(Long id) {
-        return gameRepository.findById(id);
+    public Optional<GameResponse> findById(Long id) {
+        return gameRepository.findById(id).map(this::toResponse);
     }
 
     @Override
-    public Game save(Game game) {
-        return gameRepository.save(game);
+    public GameResponse save(GameRequest request) {
+        Game game = toEntity(request);
+        return toResponse(gameRepository.save(game));
     }
 
     @Override
-    public Game update(Long id, Game game) {
+    public GameResponse update(Long id, GameRequest request) {
         Game existing = gameRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Game not found: " + id));
-        existing.setTitle(game.getTitle());
-        existing.setGenre(game.getGenre());
-        existing.setPlatform(game.getPlatform());
-        existing.setDeveloper(game.getDeveloper());
-        existing.setReleaseYear(game.getReleaseYear());
-        existing.setDescription(game.getDescription());
-        return gameRepository.save(existing);
+        existing.setTitle(request.getTitle());
+        existing.setGenre(request.getGenre());
+        existing.setPlatform(request.getPlatform());
+        existing.setDeveloper(request.getDeveloper());
+        existing.setReleaseYear(request.getReleaseYear());
+        existing.setDescription(request.getDescription());
+        return toResponse(gameRepository.save(existing));
     }
 
     @Override
     public void deleteById(Long id) {
         gameRepository.deleteById(id);
+    }
+
+    private Game toEntity(GameRequest request) {
+        Game game = new Game();
+        game.setTitle(request.getTitle());
+        game.setGenre(request.getGenre());
+        game.setPlatform(request.getPlatform());
+        game.setDeveloper(request.getDeveloper());
+        game.setReleaseYear(request.getReleaseYear());
+        game.setDescription(request.getDescription());
+        return game;
+    }
+
+    private GameResponse toResponse(Game game) {
+        GameResponse response = new GameResponse();
+        response.setId(game.getId());
+        response.setTitle(game.getTitle());
+        response.setGenre(game.getGenre());
+        response.setPlatform(game.getPlatform());
+        response.setDeveloper(game.getDeveloper());
+        response.setReleaseYear(game.getReleaseYear());
+        response.setDescription(game.getDescription());
+        response.setCreatedAt(game.getCreatedAt());
+        response.setUpdatedAt(game.getUpdatedAt());
+        return response;
     }
 }

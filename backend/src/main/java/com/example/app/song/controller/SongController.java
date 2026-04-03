@@ -1,11 +1,13 @@
 package com.example.app.song.controller;
 
-import com.example.app.song.domain.Song;
+import com.example.app.song.dto.SongRequest;
+import com.example.app.song.dto.SongResponse;
 import com.example.app.song.service.SongService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -16,26 +18,26 @@ public class SongController {
     private final SongService songService;
 
     @GetMapping
-    public List<Song> getAll() {
+    public List<SongResponse> getAll() {
         return songService.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Song> getById(@PathVariable Long id) {
+    public ResponseEntity<SongResponse> getById(@PathVariable Long id) {
         return songService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Song create(@RequestBody Song song) {
-        return songService.save(song);
+    public SongResponse create(@Valid @RequestBody SongRequest request) {
+        return songService.save(request);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Song> update(@PathVariable Long id, @RequestBody Song song) {
+    public ResponseEntity<SongResponse> update(@PathVariable Long id, @Valid @RequestBody SongRequest request) {
         try {
-            return ResponseEntity.ok(songService.update(id, song));
+            return ResponseEntity.ok(songService.update(id, request));
         } catch (java.util.NoSuchElementException e) {
             return ResponseEntity.notFound().build();
         }
