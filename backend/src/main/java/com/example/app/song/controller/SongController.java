@@ -3,11 +3,12 @@ package com.example.app.song.controller;
 import com.example.app.song.dto.SongRequest;
 import com.example.app.song.dto.SongResponse;
 import com.example.app.song.service.SongService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -45,7 +46,11 @@ public class SongController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        songService.deleteById(id);
-        return ResponseEntity.noContent().build();
+        try {
+            songService.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } catch (EmptyResultDataAccessException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

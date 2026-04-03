@@ -3,11 +3,12 @@ package com.example.app.game.controller;
 import com.example.app.game.dto.GameRequest;
 import com.example.app.game.dto.GameResponse;
 import com.example.app.game.service.GameService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -45,7 +46,11 @@ public class GameController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        gameService.deleteById(id);
-        return ResponseEntity.noContent().build();
+        try {
+            gameService.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } catch (EmptyResultDataAccessException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

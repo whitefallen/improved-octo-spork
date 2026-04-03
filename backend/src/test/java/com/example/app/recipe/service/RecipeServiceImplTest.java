@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -102,8 +103,16 @@ class RecipeServiceImplTest {
 
     @Test
     void deleteById_callsRepository() {
-        doNothing().when(recipeRepository).deleteById(1L);
+        when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
+        doNothing().when(recipeRepository).delete(recipe);
         recipeService.deleteById(1L);
-        verify(recipeRepository).deleteById(1L);
+        verify(recipeRepository).delete(recipe);
+    }
+
+    @Test
+    void deleteById_notFound_throwsException() {
+        when(recipeRepository.findById(99L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> recipeService.deleteById(99L))
+                .isInstanceOf(EmptyResultDataAccessException.class);
     }
 }

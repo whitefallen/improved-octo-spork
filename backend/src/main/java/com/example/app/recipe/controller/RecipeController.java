@@ -3,11 +3,12 @@ package com.example.app.recipe.controller;
 import com.example.app.recipe.dto.RecipeRequest;
 import com.example.app.recipe.dto.RecipeResponse;
 import com.example.app.recipe.service.RecipeService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -45,7 +46,11 @@ public class RecipeController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        recipeService.deleteById(id);
-        return ResponseEntity.noContent().build();
+        try {
+            recipeService.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } catch (EmptyResultDataAccessException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

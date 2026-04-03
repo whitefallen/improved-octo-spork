@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -102,8 +103,16 @@ class GameServiceImplTest {
 
     @Test
     void deleteById_callsRepository() {
-        doNothing().when(gameRepository).deleteById(1L);
+        when(gameRepository.findById(1L)).thenReturn(Optional.of(game));
+        doNothing().when(gameRepository).delete(game);
         gameService.deleteById(1L);
-        verify(gameRepository).deleteById(1L);
+        verify(gameRepository).delete(game);
+    }
+
+    @Test
+    void deleteById_notFound_throwsException() {
+        when(gameRepository.findById(99L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> gameService.deleteById(99L))
+                .isInstanceOf(EmptyResultDataAccessException.class);
     }
 }

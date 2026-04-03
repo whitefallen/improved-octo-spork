@@ -5,6 +5,7 @@ import com.example.app.song.dto.SongRequest;
 import com.example.app.song.dto.SongResponse;
 import com.example.app.song.repository.SongRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +54,9 @@ public class SongServiceImpl implements SongService {
 
     @Override
     public void deleteById(Long id) {
-        songRepository.deleteById(id);
+        Song entity = songRepository.findById(id)
+                .orElseThrow(() -> new EmptyResultDataAccessException("Song not found: " + id, 1));
+        songRepository.delete(entity);
     }
 
     private Song toEntity(SongRequest request) {

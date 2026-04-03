@@ -5,6 +5,7 @@ import com.example.app.game.dto.GameRequest;
 import com.example.app.game.dto.GameResponse;
 import com.example.app.game.repository.GameRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,7 +55,9 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void deleteById(Long id) {
-        gameRepository.deleteById(id);
+        Game entity = gameRepository.findById(id)
+                .orElseThrow(() -> new EmptyResultDataAccessException("Game not found: " + id, 1));
+        gameRepository.delete(entity);
     }
 
     private Game toEntity(GameRequest request) {

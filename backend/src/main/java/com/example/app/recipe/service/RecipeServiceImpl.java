@@ -5,6 +5,7 @@ import com.example.app.recipe.dto.RecipeRequest;
 import com.example.app.recipe.dto.RecipeResponse;
 import com.example.app.recipe.repository.RecipeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +54,9 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public void deleteById(Long id) {
-        recipeRepository.deleteById(id);
+        Recipe entity = recipeRepository.findById(id)
+                .orElseThrow(() -> new EmptyResultDataAccessException("Recipe not found: " + id, 1));
+        recipeRepository.delete(entity);
     }
 
     private Recipe toEntity(RecipeRequest request) {

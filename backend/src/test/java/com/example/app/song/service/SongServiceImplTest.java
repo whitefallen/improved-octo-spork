@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -100,8 +101,16 @@ class SongServiceImplTest {
 
     @Test
     void deleteById_callsRepository() {
-        doNothing().when(songRepository).deleteById(1L);
+        when(songRepository.findById(1L)).thenReturn(Optional.of(song));
+        doNothing().when(songRepository).delete(song);
         songService.deleteById(1L);
-        verify(songRepository).deleteById(1L);
+        verify(songRepository).delete(song);
+    }
+
+    @Test
+    void deleteById_notFound_throwsException() {
+        when(songRepository.findById(99L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> songService.deleteById(99L))
+                .isInstanceOf(EmptyResultDataAccessException.class);
     }
 }
